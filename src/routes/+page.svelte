@@ -287,6 +287,10 @@
 		color: var(--error-color); /* Use error color variable */
 	}
 
+	.output-area p.input-line {
+		font-weight: bold;
+	}
+
 	.input-area {
 		display: flex;
 		align-items: center;
