@@ -30,7 +30,7 @@
 	onMount(() => {
 		// Initial welcome message setup
 		const welcomeMessages = [
-			{ text: 'Welcome to bpterminal v0.1.0', delay: 0 }, // Finishes ~840ms
+			{ text: 'Welcome to bpterminal v1.2.0', delay: 0 }, // Finishes ~840ms
 			{ text: "Type 'help' or click \"?\" button on the bottom right to see available commands.", delay: 1000 }, // Finishes ~3550ms
 			{ text: ' ', delay: 3700 } // Finishes ~3730ms
 		];
