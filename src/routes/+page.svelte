@@ -30,9 +30,9 @@
 	onMount(() => {
 		// Initial welcome message setup
 		const welcomeMessages = [
-			{ text: 'Welcome to bpterminal v0.1.0', delay: 0 },
-			{ text: "Type 'help' or click \"?\" button on the bottom right to see available commands.", delay: 1500 }, // Delay after first line, UPDATED TEXT
-			{ text: ' ', delay: 3000 }
+			{ text: 'Welcome to bpterminal v0.1.0', delay: 0 }, // Finishes ~840ms
+			{ text: "Type 'help' or click \"?\" button on the bottom right to see available commands.", delay: 1000 }, // Finishes ~3550ms
+			{ text: ' ', delay: 3700 } // Finishes ~3730ms
 		];
 
 		output = welcomeMessages.map((msg) => ({
@@ -49,10 +49,16 @@
 
 		// Focus the input after welcome message animation
 		setTimeout(() => {
-			inputElement?.focus();
+			if (inputElement) {
+				setTimeout(() => { // Delay focus slightly
+					inputElement.focus();
+					inputElement.removeAttribute('disabled');
+				}, 0); // Execute after current stack clears
+			} else {
+				// Error log removed
+			}
 			canType = true;
-			inputElement?.removeAttribute('disabled');
-		}, 3500);
+		}, 3800); // Adjusted timeout
 	});
 
 	async function handleCommand() {
@@ -60,8 +66,8 @@
 		const currentCommand = commandInput;
 		if (!currentCommand.trim()) return; // Ignore empty commands
 
-		// Add command to output and history
-		output = [...output, { id: lineIdCounter++, type: 'input', text: `> ${currentCommand}` }];
+		// Add command to output and history - ensure NO typewriter effect
+		output = [...output, { id: lineIdCounter++, type: 'input', text: `> ${currentCommand}` }]; // No useTypewriter flag
 		if (currentCommand !== commandHistory[commandHistory.length - 1]) {
 			commandHistory = [...commandHistory, currentCommand];
 		}
@@ -70,7 +76,7 @@
 
 		// Execute command
 		const result = await executeCommand(currentCommand, $page.url.pathname);
-		const resultString = Array.isArray(result) ? result.join('\n') : String(result); // Ensure it's a string
+		const resultString = Array.isArray(result) ? result.join('\n') : String(result);
 
 		// Handle clear command separately
 		if (resultString === '__CLEAR__') {
@@ -85,9 +91,11 @@
 				resultString.toLowerCase().includes('no such file')
 					? 'error'
 					: ('output' as 'error' | 'output'); // Explicitly cast type
+			// Ensure new output lines do NOT use typewriter
+			const newOutputLines = lines.map((line) => ({ id: lineIdCounter++, type: resultType, text: line })); // No useTypewriter flag
 			output = [
 				...output,
-				...lines.map((line) => ({ id: lineIdCounter++, type: resultType, text: line }))
+				...newOutputLines
 			];
 		}
 
@@ -201,7 +209,7 @@
 					class:input-line={lineItem.type === 'input'}
 					use:typewriter={{
 						text: lineItem.text,
-						speed: 50,
+						speed: 30, // Faster speed
 						delay: lineItem.typewriterDelay ?? 0
 					}}
 				>
@@ -229,7 +237,7 @@
 				type="text"
 				bind:value={commandInput}
 				aria-label="Command input"
-				on:keydown={handleKeyDown}
+				on:keydown={(e) => { handleKeyDown(e); }}
 				on:input={updateSuggestion}
 				autocomplete="off"
 				autocorrect="off"
@@ -283,6 +291,9 @@
 	.input-area {
 		display: flex;
 		align-items: center;
+		border-top: 1px solid var(--primary-color); /* Add separator line */
+		padding-top: 0.5rem; /* Add some padding above the input */
+		margin-top: 0.5rem; /* Add some space between output and input area */
 	}
 
 	.input-area span {

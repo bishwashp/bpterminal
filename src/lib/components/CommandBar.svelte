@@ -22,9 +22,15 @@
 	let suggestion = '';
 
 	// --- Reactive Statement for Page Navigation ---
-	// This runs whenever page.url.pathname changes
-	$: if ($page.url.pathname && showOutput) {
-		closeOutput();
+	// React only to path changes
+	$: pathChanged($page.url.pathname);
+
+	// Function to handle path changes and close output if needed
+	function pathChanged(newPath: string) {
+		// We only need to close if the path actually changes AND the output is currently showing
+		if (newPath && showOutput) {
+			closeOutput();
+		}
 	}
 
 	async function handleCommand() {
@@ -41,6 +47,7 @@
 		// Execute command
 		const result = await executeCommand(currentCommand, $page.url.pathname);
 		const resultString = Array.isArray(result) ? result.join('\n') : String(result);
+		// console.log('[CommandBar] handleCommand resultString:', resultString); // REMOVED Log result
 
 		if (resultString && resultString !== '__CLEAR__') {
 			// Don't show output for clear or void results
@@ -52,7 +59,9 @@
 					? 'error'
 					: 'output';
 			outputText = resultString;
+			// console.log('[CommandBar] Setting showOutput = true'); // REMOVED Log before setting
 			showOutput = true;
+			// console.log('[CommandBar] showOutput is now:', showOutput); // REMOVED Log after setting
 		} else {
 			showOutput = false; // Ensure output is hidden if command has no output
 		}
@@ -60,12 +69,14 @@
 	}
 
 	function closeOutput() {
+		// console.log('[CommandBar] closeOutput called.'); // REMOVED Log
 		showOutput = false;
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
 		// Dismiss output on any relevant key press in the input
 		if (showOutput && event.key !== 'Shift' && event.key !== 'Control' && event.key !== 'Alt' && event.key !== 'Meta') {
+			// console.log('[CommandBar] handleKeyDown closing output due to key press.'); // REMOVED Log
 			closeOutput();
 		}
 
@@ -169,10 +180,10 @@
 
 <div class="command-bar-container" bind:this={commandBarContainerElement}>
 	{#if showOutput}
+		<!-- {console.log('[CommandBar] Rendering output block, outputText:', outputText)} --> <!-- REMOVED Log -->
 		<div
 			class="command-output"
 			class:error={outputType === 'error'}
-			transition:fly={{ y: 10, duration: 300 }}
 		>
 			<button class="close-output-btn" on:click={closeOutput} aria-label="Close output">&times;</button>
 			<pre>{outputText}</pre>
@@ -222,6 +233,7 @@
 		bottom: 100%; /* Position above the input bar */
 		left: 0;
 		width: 100%;
+		background-color: var(--secondary-color);
 		color: var(--primary-color);
 		padding: 0.5rem 1rem;
 		border-top: 1px solid var(--primary-color);

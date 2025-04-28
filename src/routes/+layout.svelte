@@ -174,7 +174,9 @@
 	{showGuide ? 'X' : '?'}
 </button>
 
-<CommandBar />
+{#if !isHomePage}
+	<CommandBar />
+{/if}
 
 <!-- Render Guide Modal -->
 {#if showGuide}

@@ -12,6 +12,7 @@ export function typewriter(
 	params: { text: string; speed?: number; delay?: number }
 ) {
 	const { text, speed = 50, delay = 0 } = params;
+	const originalText = text; // Store the initial text
 	let i = 0;
 	let intervalId: ReturnType<typeof setInterval>;
 
@@ -37,22 +38,31 @@ export function typewriter(
 	return {
 		// Optional: Update method if params change dynamically (not strictly needed here)
 		update(newParams: { text: string; speed?: number; delay?: number }) {
-			// If text changes, restart the effect (basic implementation)
-			clearInterval(intervalId);
-			i = 0;
-			node.textContent = '';
 			const { text: newText, speed: newSpeed = 50, delay: newDelay = 0 } = newParams;
-			setTimeout(() => {
-				intervalId = setInterval(() => {
-					if (i < newText.length) {
-						node.textContent += newText.charAt(i);
-						i++;
-					} else {
-						clearInterval(intervalId);
-						node.dispatchEvent(new CustomEvent('typewriterComplete'));
-					}
-				}, newSpeed);
-			}, newDelay);
+
+			// Only restart if the text content itself has changed
+			if (newText !== originalText) {
+				clearInterval(intervalId);
+				i = 0;
+				node.textContent = ''; // Clear before restarting
+				// Update originalText if we intend to allow dynamic text changes later
+				// originalText = newText; // Uncomment if needed
+
+				setTimeout(() => {
+					intervalId = setInterval(() => {
+						if (i < newText.length) {
+							node.textContent += newText.charAt(i);
+							i++;
+						} else {
+							clearInterval(intervalId);
+							node.dispatchEvent(new CustomEvent('typewriterComplete'));
+						}
+					}, newSpeed); // Use newSpeed
+				}, newDelay); // Use newDelay
+			} else {
+				// Optional: If only speed/delay changed, could update them without restarting
+				// For now, we do nothing if text is the same, preserving the original animation.
+			}
 		},
 
 		destroy() {
