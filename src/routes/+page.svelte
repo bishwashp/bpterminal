@@ -223,9 +223,8 @@
 					class:error={lineItem.type === 'error'}
 					class:input-line={lineItem.type === 'input'}
 				>
-					{lineItem.text || '&nbsp;'}
+					{#if lineItem.text}{lineItem.text}{:else}{@html '&nbsp;'}{/if} <!-- Display text directly, use rendered nbsp if empty -->
 				</p>
-				<!-- Display text directly, use nbsp if empty -->
 			{/if}
 		{/each}
 	</div>
