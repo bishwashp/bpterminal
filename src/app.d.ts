@@ -9,12 +9,12 @@ declare global {
 		// interface Platform {}
 	}
 
-    // Add custom event types for Svelte actions
-    namespace svelteHTML {
-        interface HTMLAttributes<T> {
-            'on:typewriterComplete'?: (event: CustomEvent<any>) => void;
-        }
-    }
+	// Add custom event types for Svelte actions
+	namespace svelteHTML {
+		interface HTMLAttributes {
+			'on:typewriterComplete'?: (event: CustomEvent<null>) => void;
+		}
+	}
 }
 
 export {};

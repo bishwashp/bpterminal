@@ -7,7 +7,7 @@ excerpt: 'This is the very first blog post on this terminal-themed website, buil
 
 ## Welcome
 
-This is the main content of the *first* blog post.
+This is the main content of the _first_ blog post.
 
 We can write **Markdown** here, and it will be converted to HTML.
 
@@ -15,4 +15,4 @@ We can write **Markdown** here, and it will be converted to HTML.
 console.log('Code blocks work too!');
 ```
 
-Stay tuned for more updates. 
+Stay tuned for more updates.

@@ -13,4 +13,4 @@ The goal was to create something familiar yet modern.
 - **Performance:** Ensure a snappy experience.
 - **Customization:** Allow users to personalize their view.
 
-This post delves deeper into these aspects. 
+This post delves deeper into these aspects.
