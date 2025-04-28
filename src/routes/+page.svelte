@@ -31,7 +31,7 @@
 		// Initial welcome message setup
 		const welcomeMessages = [
 			{ text: 'Welcome to bpterminal v0.1.0', delay: 0 },
-			{ text: "Type 'help' to see available commands.", delay: 1500 }, // Delay after first line
+			{ text: "Type 'help' or click \"?\" button on the bottom right to see available commands.", delay: 1500 }, // Delay after first line, UPDATED TEXT
 			{ text: ' ', delay: 3000 }
 		];
 

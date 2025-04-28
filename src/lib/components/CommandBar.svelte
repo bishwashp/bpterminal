@@ -1,6 +1,8 @@
 <!-- src/lib/components/CommandBar.svelte -->
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import {
 		executeCommand,
 		getAvailableCommands,
@@ -16,7 +18,14 @@
 	let outputText = '';
 	let outputType: 'output' | 'error' = 'output';
 	let inputElement: HTMLInputElement;
+	let commandBarContainerElement: HTMLDivElement;
 	let suggestion = '';
+
+	// --- Reactive Statement for Page Navigation ---
+	// This runs whenever page.url.pathname changes
+	$: if ($page.url.pathname && showOutput) {
+		closeOutput();
+	}
 
 	async function handleCommand() {
 		const currentCommand = commandInput;
@@ -44,15 +53,22 @@
 					: 'output';
 			outputText = resultString;
 			showOutput = true;
-			// Hide output after a delay
-			setTimeout(() => (showOutput = false), 3000);
 		} else {
 			showOutput = false; // Ensure output is hidden if command has no output
 		}
 		suggestion = ''; // Clear suggestion after command
 	}
 
+	function closeOutput() {
+		showOutput = false;
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
+		// Dismiss output on any relevant key press in the input
+		if (showOutput && event.key !== 'Shift' && event.key !== 'Control' && event.key !== 'Alt' && event.key !== 'Meta') {
+			closeOutput();
+		}
+
 		// Suggestion Acceptance (Tab or ArrowRight at end of input)
 		if (
 			(event.key === 'Tab' ||
@@ -112,9 +128,9 @@
 		} else {
 			let candidates: string[] = [];
 			if (commandName === 'cd' || commandName === 'ls' || commandName === 'cat') {
-				candidates = getPathCompletions($page.url.pathname);
+				candidates = getPathCompletions();
 			} else if (commandName === 'set-font') {
-				candidates = availableFonts.map((f: string) => f.split(',')[0].replace(/['\"]/g, ''));
+				candidates = availableFonts.map((f: string) => f.split(',')[0].replace(/['"]/g, ''));
 			}
 			potentialCompletions = candidates.filter((p) => p.startsWith(lastPart));
 		}
@@ -130,15 +146,35 @@
 			suggestion = '';
 		}
 	}
+
+	// --- Dismissal Logic ---
+	function handleOutsideClick(event: MouseEvent) {
+		if (showOutput && commandBarContainerElement && !commandBarContainerElement.contains(event.target as Node)) {
+			closeOutput();
+		}
+	}
+
+	onMount(() => {
+		if (browser) {
+			window.addEventListener('click', handleOutsideClick);
+		}
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			window.removeEventListener('click', handleOutsideClick);
+		}
+	});
 </script>
 
-<div class="command-bar-container">
+<div class="command-bar-container" bind:this={commandBarContainerElement}>
 	{#if showOutput}
 		<div
 			class="command-output"
 			class:error={outputType === 'error'}
 			transition:fly={{ y: 10, duration: 300 }}
 		>
+			<button class="close-output-btn" on:click={closeOutput} aria-label="Close output">&times;</button>
 			<pre>{outputText}</pre>
 		</div>
 	{/if}
@@ -191,6 +227,7 @@
 		border-top: 1px solid var(--primary-color);
 		max-height: 150px; /* Limit height */
 		overflow-y: auto;
+		position: relative; /* Needed for absolute positioning of button */
 	}
 	.command-output.error {
 		color: var(--error-color);
@@ -259,5 +296,24 @@
 
 	.suggestion-suffix {
 		color: rgba(128, 128, 128, 0.7);
+	}
+
+	.close-output-btn {
+		position: absolute;
+		top: 0.25rem;
+		right: 0.5rem;
+		background: none;
+		border: none;
+		color: inherit;
+		opacity: 0.7;
+		font-size: 1.2rem;
+		line-height: 1;
+		padding: 0.1rem 0.25rem;
+		cursor: pointer;
+		z-index: 1;
+	}
+
+	.close-output-btn:hover {
+		opacity: 1;
 	}
 </style>

@@ -70,6 +70,7 @@ function hexToRgb(hex: string): [number, number, number] | null {
 // Function to apply theme settings as CSS variables
 function applyTheme(settings: ThemeSettings) {
 	if (browser) {
+		console.log('Applying theme:', settings);
 		document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
 		document.documentElement.style.setProperty('--secondary-color', settings.secondaryColor);
 		document.documentElement.style.setProperty('--font-family', settings.fontFamily);
@@ -78,6 +79,7 @@ function applyTheme(settings: ThemeSettings) {
 
 		// Update primary color RGB variable
 		const rgb = hexToRgb(settings.primaryColor);
+		console.log('Calculated RGB:', rgb);
 		if (rgb) {
 			document.documentElement.style.setProperty('--primary-color-rgb', rgb.join(', '));
 		} else {

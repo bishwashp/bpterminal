@@ -5,6 +5,8 @@
 	import { browser } from '$app/environment'; // Import browser check
 	import CommandBar from '$lib/components/CommandBar.svelte';
 	import NavMenu from '$lib/components/NavMenu.svelte';
+	import ThemeCustomizer from '$lib/components/ThemeCustomizer.svelte'; // Import the new component
+	import { isCustomizerOpen } from '$lib/stores/uiStore'; // Import the store
 	// Import the default export from gsap
 	import type { default as gsapType } from 'gsap';
 	// Import Action type
@@ -174,7 +176,7 @@
 
 <CommandBar />
 
-<!-- Revert conditional rendering -->
+<!-- Render Guide Modal -->
 {#if showGuide}
 	<div
 		bind:this={guideOverlayEl}
@@ -223,6 +225,11 @@
 			<p>Use <code>Tab</code> or <code>Right Arrow</code> to accept suggestions.</p>
 		</section>
 	</div>
+{/if}
+
+<!-- Render Theme Customizer Modal -->
+{#if $isCustomizerOpen}
+	<ThemeCustomizer />
 {/if}
 
 <style>

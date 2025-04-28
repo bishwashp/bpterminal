@@ -1,5 +1,6 @@
 import { goto } from '$app/navigation';
 import { theme, availableFonts as themeAvailableFonts } from '$lib/stores/themeStore'; // Import store and options
+import { isCustomizerOpen } from '$lib/stores/uiStore'; // Import UI store
 
 // Re-export availableFonts from the theme store for convenience in command handler
 export const availableFonts = themeAvailableFonts;
@@ -95,7 +96,7 @@ commands['ls'] = {
 commands['cd'] = {
 	description: 'Changes the directory (navigates to a page). Usage: cd <page>',
 	action: async (args: string[], currentPath: string) => {
-		const target = args[0];
+		let target = args[0];
 		if (!target) {
 			return 'usage: cd <directory>';
 		}
@@ -106,27 +107,31 @@ commands['cd'] = {
 		if (target === '/' || target === '~') {
 			if (currentPath !== '/') {
 				await goto('/');
-				// Return void or empty string, navigation is the action
 			}
-			return; // Already home or navigation started
+			return;
 		}
 
 		// Handle 'cd ..'
 		if (target === '..') {
 			if (currentPath !== '/') {
-				// Basic parent logic, assumes one level deep for now
 				await goto('/');
 			}
-			return; // Already home or navigation started
+			return;
 		}
 
-		// Check if it's a valid target from the root
-		if (homeCompletions.includes(target)) {
-			if (`/${target}` !== currentPath) {
-				await goto(`/${target}`); // Use SvelteKit navigation
-				// Return void, navigation is the action
+		// Handle absolute paths like /projects by stripping leading /
+		let targetPath = target;
+		if (targetPath.startsWith('/') && targetPath.length > 1) {
+			targetPath = targetPath.substring(1);
+		}
+
+		// Check if it's a valid target from the root (using the potentially stripped path)
+		if (homeCompletions.includes(targetPath)) {
+			const finalPath = `/${targetPath}`;
+			if (finalPath !== currentPath) {
+				await goto(finalPath); // Use SvelteKit navigation
 			}
-			return; // Navigation started or already there
+			return;
 		}
 
 		// If none of the above match
@@ -244,6 +249,17 @@ commands['reset-theme'] = {
 	action: () => {
 		theme.reset();
 		return 'Theme reset to defaults.';
+	}
+};
+
+// --- New Customize Command ---
+
+commands['customize'] = {
+	description: 'Opens the theme customization panel.',
+	action: () => {
+		isCustomizerOpen.set(true);
+		// Return nothing, the action happens via the store change
+		return; 
 	}
 };
 
